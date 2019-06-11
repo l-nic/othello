@@ -2,17 +2,20 @@
 #include <cstdlib>
 #include <ctime>
 #include <cstring>
+#include <ratio>
+#include <chrono>
+#include <vector>
 #include "board.hpp"
 
 using namespace std;
 
 // Function prototypes
-void minimaxDecision(Board board, int &x, int &y);
-int minimaxValue(Board board, char originalTurn, int searchPly);
+void minimaxDecision(Board board, int maxPlyDepth, int &x, int &y);
+int minimaxValue(Board board, char originalTurn, int searchPly, int maxPlyDepth);
 
 // This is the minimax decision function. It calls minimaxValue for each position
 // on the board and returns the best move (largest value returned) in x and y.
-void minimaxDecision(Board board, int &x, int &y)
+void minimaxDecision(Board board, int maxPlyDepth, int &x, int &y)
 {	
 	int moveX[60], moveY[60];
 	int numMoves;
@@ -38,7 +41,7 @@ void minimaxDecision(Board board, int &x, int &y)
 			// Recursive call
 			// Set turn to opponent
 			tempBoard.setCurrentPlayer(tempBoard.getOpponentPiece());
-			int val = minimaxValue(tempBoard, board.getWhosePiece(), 1);
+			int val = minimaxValue(tempBoard, board.getWhosePiece(), 1, maxPlyDepth);
 			// Remember best move
 			if (val > bestMoveVal)
 			{
@@ -57,9 +60,9 @@ void minimaxDecision(Board board, int &x, int &y)
 // It is hard-coded here to look 5 ply ahead.  originalTurn is the original player piece
 // which is needed to determine if this is a MIN or a MAX move.  It is also needed to 
 // calculate the heuristic. currentTurn flips between X and O.
-int minimaxValue(Board board, char originalTurn, int searchPly)
+int minimaxValue(Board board, char originalTurn, int searchPly, int maxPlyDepth)
 {
-	if ((searchPly == 5) || board.gameOver()) // Change to desired ply lookahead
+	if ((searchPly == maxPlyDepth) || board.gameOver()) // Change to desired ply lookahead
 	{
 		return board.heuristic(originalTurn); // Termination criteria
 	}
@@ -72,7 +75,7 @@ int minimaxValue(Board board, char originalTurn, int searchPly)
 	{
 		Board temp = board;
 		temp.setCurrentPlayer(opponent);
-		return minimaxValue(temp, originalTurn, searchPly + 1);
+		return minimaxValue(temp, originalTurn, searchPly + 1, maxPlyDepth);
 	}
 	else
 	{
@@ -80,7 +83,7 @@ int minimaxValue(Board board, char originalTurn, int searchPly)
 		int bestMoveVal = -99999; // for finding max
 		if (originalTurn != board.getWhosePiece())
 			bestMoveVal = 99999; // for finding min
-								 // Try out every single move
+		// Try out every single move
 		for (int i = 0; i < numMoves; i++)
 		{
 			// Apply the move to a new board
@@ -89,7 +92,7 @@ int minimaxValue(Board board, char originalTurn, int searchPly)
 			// Recursive call
 			// Opponent's turn
 			tempBoard.setCurrentPlayer(tempBoard.getOpponentPiece());
-			int val = minimaxValue(tempBoard, originalTurn, searchPly + 1);
+			int val = minimaxValue(tempBoard, originalTurn, searchPly + 1, maxPlyDepth);
 			// Remember best move
 			if (originalTurn == board.getWhosePiece())
 			{
@@ -116,20 +119,33 @@ int main()
 	Board gameBoard;
 	gameBoard.setCurrentPlayer('X');
 
+	int maxPlyDepth = 1;
+	vector<double> timeSamples;
+
 	while (!gameBoard.gameOver())
 	{
 		gameBoard.display();
 		cout << "It is player " << gameBoard.getWhosePiece() << "'s turn." << endl;
 		cout << "Enter move." << endl;
 		int x, y;
-		if (gameBoard.getWhosePiece() == 'O')		// Change comments depending on who to play
-			//cin >> x >> y;
-			minimaxDecision(gameBoard, x, y);
-		//getRandomMove(board, x, y, 'O');
+		if (gameBoard.getWhosePiece() == 'O') // Change comments depending on who to play
+		{
+			// record start time
+			chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
+			// perform  minimax search
+			minimaxDecision(gameBoard, maxPlyDepth, x, y);
+			// record finish time
+			chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
+			// compute delta
+			chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
+			cout << "MiniMax search completed in " << time_span.count() << " seconds." << endl;
+			// record sample
+			timeSamples.push_back(time_span.count());
+		}
 		else
-			//cin >> x >> y;
+		{
 			gameBoard.getRandomMove(x, y);
-		//minimaxDecision(board, 'X', x, y);		
+		}
 		if (gameBoard.validMove(x, y) || (x == -1))
 		{
 			cout << "Moving to " << x << " " << y << endl;
@@ -147,4 +163,13 @@ int main()
 	gameBoard.display();
 	cout << "X's score: " << gameBoard.score('X') << endl;
 	cout << "O's score: " << gameBoard.score('O') << endl;
+
+	// Compute and print average time sample
+	double avgSample = 0;
+	for (int i = 0; i < timeSamples.size(); i++)
+	{
+		avgSample += timeSamples[i];
+	}
+	avgSample = avgSample/static_cast<double>(timeSamples.size());
+	cout << "Avg search time = " << avgSample << " seconds." << endl;
 }
