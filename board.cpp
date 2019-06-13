@@ -6,32 +6,36 @@
 
 using namespace std;
 
+const Board::piece_t Board::BLACK = 'X';
+const Board::piece_t Board::WHITE = 'O';
+const Board::piece_t Board::EMPTY = '.';
+
 // Initialize the board in the constructor
 Board::Board()
 {
 	for (int i = 0; i < 8; i++)
 		for (int j = 0; j < 8; j++)
-			board[i][j] = '.';
-	board[3][3] = 'X';
-	board[3][4] = 'O';
-	board[4][3] = 'O';
-	board[4][4] = 'X';
+			board[i][j] = Board::EMPTY;
+	board[3][3] = Board::BLACK;
+	board[3][4] = Board::WHITE;
+	board[4][3] = Board::WHITE;
+	board[4][4] = Board::BLACK;
 }
 
 // New methods to get the player currently moving and the opponent
-char Board::getWhosePiece()
+Board::piece_t Board::getWhosePiece()
 {
 	return whoseTurn;
 }
 
-char Board::getOpponentPiece()
+Board::piece_t Board::getOpponentPiece()
 {
-	if (whoseTurn == 'X')
-		return 'O';
-	return 'X';
+	if (whoseTurn == Board::BLACK)
+		return Board::WHITE;
+	return Board::BLACK;
 }
 
-void Board::setCurrentPlayer(char player)
+void Board::setCurrentPlayer(Board::piece_t player)
 {
 	whoseTurn = player;
 }
@@ -52,8 +56,8 @@ void Board::display()
 // Checks a direction from x,y to see if we can make a move
 bool Board::checkFlip(int x, int y, int deltaX, int deltaY)
 {
-	char opponentPiece = getOpponentPiece();
-	char myPiece = whoseTurn;
+	Board::piece_t opponentPiece = getOpponentPiece();
+	Board::piece_t myPiece = whoseTurn;
 	if (board[x][y] == opponentPiece)
 	{
 		while ((x >= 0) && (x < 8) && (y >= 0) && (y < 8))
@@ -66,7 +70,7 @@ bool Board::checkFlip(int x, int y, int deltaX, int deltaY)
 			// to move the += to the bottom of the loop
 			if ((x >= 0) && (x < 8) && (y >= 0) && (y < 8))
 			{
-				if (board[x][y] == '.')	// not consecutive
+				if (board[x][y] == Board::EMPTY) // not consecutive
 					return false;
 				if (board[x][y] == myPiece)
 					return true;		// At least one piece we can flip
@@ -129,7 +133,7 @@ void Board::makeMove(int x, int y)
 bool Board::validMove(int x, int y)
 {
 	// Check that the coordinates are empty
-	if (board[x][y] != '.')
+	if (board[x][y] != Board::EMPTY)
 		return false;
 
 	// If we can flip in any direction, it is valid
@@ -214,7 +218,7 @@ void Board::getRandomMove(int &x, int &y)
 }
 
 // Returns the score for the piece
-int Board::score(char piece)
+int Board::score(Board::piece_t piece)
 {
 	int total = 0;
 	for (int x = 0; x < 8; x++)
@@ -229,12 +233,12 @@ int Board::score(char piece)
 
 // The simple heuristic is simply the number of our pieces - the number of opponent pieces.
 // Weighting the edges and corners will result in a better player.
-int Board::heuristic(char whoseTurn)
+int Board::heuristic(Board::piece_t whoseTurn)
 {	
 	int ourScore = score(whoseTurn);
-	char opponent = 'X';
-	if (whoseTurn == 'X')
-		opponent = 'O';
+	Board::piece_t opponent = Board::BLACK;
+	if (whoseTurn == Board::BLACK)
+		opponent = Board::WHITE;
 	int opponentScore = score(opponent);
 	return (ourScore - opponentScore);
 }

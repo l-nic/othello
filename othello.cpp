@@ -11,7 +11,7 @@ using namespace std;
 
 // Function prototypes
 void minimaxDecision(Board board, int maxPlyDepth, int &x, int &y);
-int minimaxValue(Board board, char originalTurn, int searchPly, int maxPlyDepth);
+int minimaxValue(Board board, Board::piece_t originalTurn, int searchPly, int maxPlyDepth);
 
 // This is the minimax decision function. It calls minimaxValue for each position
 // on the board and returns the best move (largest value returned) in x and y.
@@ -19,7 +19,7 @@ void minimaxDecision(Board board, int maxPlyDepth, int &x, int &y)
 {	
 	int moveX[60], moveY[60];
 	int numMoves;
-	char opponent = board.getOpponentPiece();
+	Board::piece_t opponent = board.getOpponentPiece();
 
 	board.getMoveList(moveX, moveY, numMoves);
 	if (numMoves == 0) // if no moves return -1
@@ -60,7 +60,7 @@ void minimaxDecision(Board board, int maxPlyDepth, int &x, int &y)
 // It is hard-coded here to look 5 ply ahead.  originalTurn is the original player piece
 // which is needed to determine if this is a MIN or a MAX move.  It is also needed to 
 // calculate the heuristic. currentTurn flips between X and O.
-int minimaxValue(Board board, char originalTurn, int searchPly, int maxPlyDepth)
+int minimaxValue(Board board, Board::piece_t originalTurn, int searchPly, int maxPlyDepth)
 {
 	if ((searchPly == maxPlyDepth) || board.gameOver()) // Change to desired ply lookahead
 	{
@@ -68,7 +68,7 @@ int minimaxValue(Board board, char originalTurn, int searchPly, int maxPlyDepth)
 	}
 	int moveX[60], moveY[60];
 	int numMoves;
-	char opponent = board.getOpponentPiece();
+	Board::piece_t opponent = board.getOpponentPiece();
 
 	board.getMoveList(moveX, moveY, numMoves);
 	if (numMoves == 0) // if no moves skip to next player's turn
@@ -117,7 +117,7 @@ int main()
 {
 	srand(time(NULL));
 	Board gameBoard;
-	gameBoard.setCurrentPlayer('X');
+	gameBoard.setCurrentPlayer(Board::BLACK);
 
 	int maxPlyDepth = 1;
 	vector<double> timeSamples;
@@ -128,7 +128,7 @@ int main()
 		cout << "It is player " << gameBoard.getWhosePiece() << "'s turn." << endl;
 		cout << "Enter move." << endl;
 		int x, y;
-		if (gameBoard.getWhosePiece() == 'O') // Change comments depending on who to play
+		if (gameBoard.getWhosePiece() == Board::WHITE) // Change comments depending on who to play
 		{
 			// record start time
 			chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
@@ -161,8 +161,8 @@ int main()
 	}
 	cout << endl << "The game is over!" << endl;
 	gameBoard.display();
-	cout << "X's score: " << gameBoard.score('X') << endl;
-	cout << "O's score: " << gameBoard.score('O') << endl;
+	cout << Board::BLACK << "'s score: " << gameBoard.score(Board::BLACK) << endl;
+	cout << Board::WHITE << "'s score: " << gameBoard.score(Board::WHITE) << endl;
 
 	// Compute and print average time sample
 	double avgSample = 0;
