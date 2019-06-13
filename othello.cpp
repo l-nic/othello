@@ -161,8 +161,8 @@ int main()
 	}
 	cout << endl << "The game is over!" << endl;
 	gameBoard.display();
-	cout << Board::BLACK << "'s score: " << gameBoard.score(Board::BLACK) << endl;
-	cout << Board::WHITE << "'s score: " << gameBoard.score(Board::WHITE) << endl;
+	cout << "X's score: " << gameBoard.score(Board::BLACK) << endl;
+	cout << "O's score: " << gameBoard.score(Board::WHITE) << endl;
 
 	// Compute and print average time sample
 	double avgSample = 0;

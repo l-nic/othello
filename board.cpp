@@ -47,7 +47,9 @@ void Board::display()
 	{
 		cout << y << " ";
 		for (int x = 0; x < 8; x++)
-			cout << " " << board[x][y];
+		{
+			cout << " " << (board[x][y] == Board::BLACK ? 'X' : (board[x][y] == Board::WHITE ? 'O' : '.' ));
+		}
 		cout << endl;
 	}
 	cout << "   0 1 2 3 4 5 6 7" << endl;
@@ -60,25 +62,16 @@ bool Board::checkFlip(int x, int y, int deltaX, int deltaY)
 	Board::piece_t myPiece = whoseTurn;
 	if (board[x][y] == opponentPiece)
 	{
+		x += deltaX;
+		y += deltaY;
 		while ((x >= 0) && (x < 8) && (y >= 0) && (y < 8))
 		{
+			if (board[x][y] == Board::EMPTY)
+				return false;
+			else if (board[x][y] == myPiece)
+				return true;
 			x += deltaX;
 			y += deltaY;
-			// BUG in original code, allows -1 or 8. For example
-			// if x = 0 and deltaX is -1, then now x = -1
-			// I patched this with another if statement, but it might be better
-			// to move the += to the bottom of the loop
-			if ((x >= 0) && (x < 8) && (y >= 0) && (y < 8))
-			{
-				if (board[x][y] == Board::EMPTY) // not consecutive
-					return false;
-				if (board[x][y] == myPiece)
-					return true;		// At least one piece we can flip
-				else
-				{
-					// It is an opponent piece, just keep scanning in our direction
-				}
-			}
 		}
 	}
 	return false; // Either no consecutive opponent pieces or hit the edge of the board

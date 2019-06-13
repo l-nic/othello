@@ -20,7 +20,7 @@ clean:
 	rm -rf $(EXECUTABLE) $(OBJECTS) othello.debug
 
 debug:
-	$(CXX) $(CXXFLAGS) -g -o othello.debug $(SOURCES)
+	$(CXX) $(CXXFLAGS) -pg -o othello.debug $(SOURCES)
 
 run:
 	./$(EXECUTABLE)
