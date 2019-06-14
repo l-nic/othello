@@ -46,10 +46,12 @@ void othello_make_move(othello_t *o, player_t p, int row, int col);
 /* Compute a good move for player p. */
 void othello_compute_move(const othello_t *o, player_t p, int *row, int *col);
 
-
+/* Check if the game is over */
+bool othello_game_over(const othello_t *o);
 
 /* Utilities for testing, benchmarking, etc. */
 void othello_to_string(const othello_t *o, char *s);
+void othello_display(const othello_t *o);
 void othello_from_string(const char *s, othello_t *o);
 void othello_compute_random_move(const othello_t *o, player_t p,
                                  int *row, int *col);

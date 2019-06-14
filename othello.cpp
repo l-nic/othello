@@ -1,4 +1,4 @@
-#include "othello.h"
+#include "othello.hpp"
 
 #include <assert.h>
 #include <limits.h>
@@ -377,6 +377,12 @@ void othello_compute_move(const othello_t *o, player_t p, int *row, int *col)
         *col = move_idx % 8;
 }
 
+bool othello_game_over(const othello_t *o)
+{
+        return (!othello_has_valid_move(o, PLAYER_BLACK) &&
+                    !othello_has_valid_move(o, PLAYER_WHITE));
+}
+
 void othello_compute_random_move(const othello_t *o, player_t p,
                                  int *row, int *col)
 {
@@ -418,6 +424,13 @@ void othello_to_string(const othello_t *o, char *s)
                 s += sprintf(s, "%d\n", row + 1);
         }
         sprintf(s, " abcdefgh \n");
+}
+
+void othello_display(const othello_t *o)
+{
+        char s[128];
+        othello_to_string(o, s);
+        printf("%s", s);
 }
 
 void othello_from_string(const char *s, othello_t *o)

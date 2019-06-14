@@ -17,24 +17,24 @@ using namespace std;
 int main()
 {
 	srand(time(NULL));
-	Board gameBoard;
-	gameBoard.setCurrentPlayer(Board::BLACK);
+	othello_t gameBoard;
+	player_t curPlayer = PLAYER_BLACK;
 
 	int maxPlyDepth = 1;
 	vector<double> timeSamples;
 
-	while (!gameBoard.gameOver())
+	while (!othello_game_over(&gameBoard))
 	{
-		gameBoard.display();
-		cout << "It is player " << gameBoard.getWhosePiece() << "'s turn." << endl;
+		othello_display(&gameBoard);
+		cout << "It is player " << curPlayer << "'s turn." << endl;
 		cout << "Enter move." << endl;
 		int x, y;
-		if (gameBoard.getWhosePiece() == Board::WHITE) // Change comments depending on who to play
+		if (curPlayer == PLAYER_WHITE) // Change comments depending on who to play
 		{
 			// record start time
 			chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
-			// perform  minimax search
-			minimaxDecision(gameBoard, maxPlyDepth, x, y);
+			// perform minimax search
+			othello_compute_move(&gameBoard, curPlayer, &x, &y);
 			// record finish time
 			chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
 			// compute delta
@@ -45,15 +45,16 @@ int main()
 		}
 		else
 		{
-			gameBoard.getRandomMove(x, y);
+			othello_compute_random_move(&gameBoard, curPlayer, &x, &y);
 		}
-		if (gameBoard.validMove(x, y) || (x == -1))
+		bool validMove = othello_is_valid_move(&gameBoard, curPlayer, x, y);
+		if (validMove || !othello_has_valid_move(&gameBoard, curPlayer))
 		{
 			cout << "Moving to " << x << " " << y << endl;
 			// Use -1 if no move possible
-			if (x != -1)
-				gameBoard.makeMove(x, y);
-			gameBoard.setCurrentPlayer(gameBoard.getOpponentPiece());
+			if (validMove)
+				othello_make_move(&gameBoard, curPlayer, x, y);
+			curPlayer ^= 1; // swap players
 		}
 		else
 		{
@@ -61,9 +62,9 @@ int main()
 		}
 	}
 	cout << endl << "The game is over!" << endl;
-	gameBoard.display();
-	cout << "X's score: " << gameBoard.score(Board::BLACK) << endl;
-	cout << "O's score: " << gameBoard.score(Board::WHITE) << endl;
+	othello_display(&gameBoard);
+	cout << PLAYER_BLACK << "'s score: " << othello_score(&gameBoard, PLAYER_BLACK) << endl;
+	cout << PLAYER_WHITE <<"'s score: " << othello_score(&gameBoard, PLAYER_WHITE) << endl;
 
 	// Compute and print average time sample
 	double avgSample = 0;
