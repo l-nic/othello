@@ -4,7 +4,7 @@ CXX = g++
 CXXFLAGS = -std=c++11 -march=native -O3
 LDFLAGS =
 
-SOURCES = board.cpp othello.cpp
+SOURCES = board.cpp othello.cpp main.cpp
 OBJECTS = $(SOURCES:.cpp=.o)
 EXECUTABLE = othello
 
