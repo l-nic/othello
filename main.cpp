@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <cstdlib>
 #include <ctime>
 #include <cstring>
@@ -8,6 +9,7 @@
 #include "othello.hpp"
 
 using namespace std;
+using namespace std::chrono;
 
 // Main game loop
 int main()
@@ -31,15 +33,15 @@ int main()
 			if (curPlayer == PLAYER_WHITE) // Change comments depending on who to play
 			{
 				// record start time
-				chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
+				high_resolution_clock::time_point t1 = high_resolution_clock::now();
 				// perform minimax search
 				othello_compute_move(&gameBoard, curPlayer, &x, &y);
 //				othello_compute_random_move(&gameBoard, curPlayer, &x, &y);
 				// record finish time
-				chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
+				high_resolution_clock::time_point t2 = high_resolution_clock::now();
 				// compute delta
-				chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
-				cout << "MiniMax search completed in " << time_span.count() << " seconds." << endl;
+				auto time_span = duration_cast<nanoseconds>(t2 - t1);
+				cout << "MiniMax search completed in " << time_span.count() << " nanoseconds." << endl;
 				// record sample
 				timeSamples.push_back(time_span.count());
 			}
@@ -71,12 +73,16 @@ int main()
 	cout << PLAYER_BLACK << "'s score: " << othello_score(&gameBoard, PLAYER_BLACK) << endl;
 	cout << PLAYER_WHITE <<"'s score: " << othello_score(&gameBoard, PLAYER_WHITE) << endl;
 
+	ofstream outFile;
+	outFile.open ("search-duration.plotme");
 	// Compute and print average time sample
 	double avgSample = 0;
 	for (int i = 0; i < timeSamples.size(); i++)
 	{
 		avgSample += timeSamples[i];
+		outFile << timeSamples[i] << "\n";
 	}
+	outFile.close();
 	avgSample = avgSample/static_cast<double>(timeSamples.size());
-	cout << "Avg search time = " << avgSample << " seconds." << endl;
+	cout << "Avg search time = " << avgSample << " nanoseconds." << endl;
 }
