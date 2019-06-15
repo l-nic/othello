@@ -231,33 +231,35 @@ static void frontier_disks(uint64_t my_disks, uint64_t opp_disks,
 static int eval(uint64_t my_disks, uint64_t opp_disks,
                 uint64_t my_moves, uint64_t opp_moves)
 {
-        static const uint64_t CORNER_MASK = 0x8100000000000081ULL;
+        return (popcount(my_disks) - popcount(opp_disks));
 
-        int my_disk_count, opp_disk_count;
-        uint64_t my_corners, opp_corners;
-        uint64_t my_frontier, opp_frontier;
-        int score = 0;
-
-        if (!my_moves && !opp_moves) {
-                /* Terminal state. */
-                my_disk_count = popcount(my_disks);
-                opp_disk_count = popcount(opp_disks);
-                return (my_disk_count - opp_disk_count) * WIN_BONUS;
-        }
-
-        my_corners = my_disks & CORNER_MASK;
-        opp_corners = opp_disks & CORNER_MASK;
-
-        frontier_disks(my_disks, opp_disks, &my_frontier, &opp_frontier);
-
-        /* Optimize for corners, mobility and few frontier disks. */
-        score += (popcount(my_corners) - popcount(opp_corners)) * 16;
-        score += (popcount(my_moves) - popcount(opp_moves)) * 2;
-        score += (popcount(my_frontier) - popcount(opp_frontier)) * -1;
-
-        assert(abs(score) < WIN_BONUS);
-
-        return score;
+//        static const uint64_t CORNER_MASK = 0x8100000000000081ULL;
+//
+//        int my_disk_count, opp_disk_count;
+//        uint64_t my_corners, opp_corners;
+//        uint64_t my_frontier, opp_frontier;
+//        int score = 0;
+//
+//        if (!my_moves && !opp_moves) {
+//                /* Terminal state. */
+//                my_disk_count = popcount(my_disks);
+//                opp_disk_count = popcount(opp_disks);
+//                return (my_disk_count - opp_disk_count) * WIN_BONUS;
+//        }
+//
+//        my_corners = my_disks & CORNER_MASK;
+//        opp_corners = opp_disks & CORNER_MASK;
+//
+//        frontier_disks(my_disks, opp_disks, &my_frontier, &opp_frontier);
+//
+//        /* Optimize for corners, mobility and few frontier disks. */
+//        score += (popcount(my_corners) - popcount(opp_corners)) * 16;
+//        score += (popcount(my_moves) - popcount(opp_moves)) * 2;
+//        score += (popcount(my_frontier) - popcount(opp_frontier)) * -1;
+//
+//        assert(abs(score) < WIN_BONUS);
+//
+//        return score;
 }
 
 int othello_eval(const othello_t *o, player_t p)
