@@ -283,18 +283,18 @@ static int negamax(uint64_t my_disks, uint64_t opp_disks, int max_depth,
 
         /* Generate moves. */
         my_moves = generate_moves(my_disks, opp_disks);
-        opp_moves = generate_moves(opp_disks, my_disks);
+//        opp_moves = generate_moves(opp_disks, my_disks);
 
-        if (!my_moves && opp_moves) {
-                /* Null move. */
-                return -negamax(opp_disks, my_disks, max_depth, -beta, -alpha,
-                                best_move, eval_count);
-        }
+//        if (!my_moves && opp_moves) {
+//                /* Null move. */
+//                return -negamax(opp_disks, my_disks, max_depth, -beta, -alpha,
+//                                best_move, eval_count);
+//        }
 
-        if (max_depth == 0 || (!my_moves && !opp_moves)) {
+        if (max_depth == 0 || !my_moves) {
                 /* Maximum depth or terminal state reached. */
                 ++*eval_count;
-                return eval(my_disks, opp_disks, my_moves, opp_moves);
+                return eval(my_disks, opp_disks, my_moves, 0);
         }
 
         /* Find the best move. */
