@@ -26,24 +26,27 @@ int main()
 		cout << "It is player " << curPlayer << "'s turn." << endl;
 		cout << "Enter move." << endl;
 		int x, y;
-		if (curPlayer == PLAYER_WHITE) // Change comments depending on who to play
+		if (othello_has_valid_move(&gameBoard, curPlayer))
 		{
-			// record start time
-			chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
-			// perform minimax search
-			othello_compute_move(&gameBoard, curPlayer, &x, &y);
-			// record finish time
-			chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
-			// compute delta
-			chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
-			cout << "MiniMax search completed in " << time_span.count() << " seconds." << endl;
-			// record sample
-			timeSamples.push_back(time_span.count());
-		}
-		else
-		{
-			if (othello_has_valid_move(&gameBoard, curPlayer))
+			if (curPlayer == PLAYER_WHITE) // Change comments depending on who to play
+			{
+				// record start time
+				chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
+				// perform minimax search
+				othello_compute_move(&gameBoard, curPlayer, &x, &y);
+//				othello_compute_random_move(&gameBoard, curPlayer, &x, &y);
+				// record finish time
+				chrono::high_resolution_clock::time_point t2 = chrono::high_resolution_clock::now();
+				// compute delta
+				chrono::duration<double> time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
+				cout << "MiniMax search completed in " << time_span.count() << " seconds." << endl;
+				// record sample
+				timeSamples.push_back(time_span.count());
+			}
+			else
+			{
 				othello_compute_random_move(&gameBoard, curPlayer, &x, &y);
+			}
 		}
 		bool validMove = othello_is_valid_move(&gameBoard, curPlayer, x, y);
 		if (validMove || !othello_has_valid_move(&gameBoard, curPlayer))

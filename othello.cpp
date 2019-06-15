@@ -296,7 +296,7 @@ static int negamax(uint64_t my_disks, uint64_t opp_disks, int max_depth,
         }
 
         /* Find the best move. */
-        assert(alpha < beta);
+//        assert(alpha < beta);
         best = -INT_MAX;
         for (i = 0; i < 64; i++) {
                 if (!(my_moves & (1ULL << i))) {
@@ -339,7 +339,7 @@ static int iterative_negamax(uint64_t my_disks, uint64_t opp_disks,
 {
         int depth, best_move, eval_count, s;
 
-        assert(start_depth > 0 && "At least one move must be explored.");
+//        assert(start_depth > 0 && "At least one move must be explored.");
 
         eval_count = 0;
         best_move = -1;
@@ -351,7 +351,7 @@ static int iterative_negamax(uint64_t my_disks, uint64_t opp_disks,
                 }
         }
 
-        assert(best_move != -1 && "No move found?");
+//        assert(best_move != -1 && "No move found?");
 
         return best_move;
 }
@@ -366,9 +366,9 @@ void othello_compute_move(const othello_t *o, player_t p, int *row, int *col)
         int move_idx;
 
         static const int START_DEPTH = 1;
-        static const int EVAL_BUDGET = 2;
+        static const int EVAL_BUDGET = 1;
 
-        assert(othello_has_valid_move(o, p));
+//        assert(othello_has_valid_move(o, p));
 
         move_idx = iterative_negamax(o->disks[p], o->disks[p ^ 1],
                                      START_DEPTH, EVAL_BUDGET);
