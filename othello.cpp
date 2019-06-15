@@ -74,7 +74,7 @@ int othello_score(const othello_t *o, player_t p)
 #define NUM_DIRS 8
 
 /* Shift disks in direction dir. */
-static uint64_t shift(uint64_t disks, int dir)
+static uint64_t shift_right(uint64_t disks, int dir)
 {
         /* Note: the directions refer to how we shift the bits, not the
            positions on the board (where the least significant bit is
@@ -111,15 +111,47 @@ static uint64_t shift(uint64_t disks, int dir)
                 0  /* Up-right. */
         };
 
-//        assert(dir >= 0 && dir < NUM_DIRS);
+        return (disks >> RSHIFTS[dir]) & MASKS[dir];
+}
 
-        if (dir < NUM_DIRS / 2) {
-//                assert(LSHIFTS[dir] == 0 && "Shifting right.");
-                return (disks >> RSHIFTS[dir]) & MASKS[dir];
-        } else {
-//                assert(RSHIFTS[dir] == 0 && "Shifting left.");
-                return (disks << LSHIFTS[dir]) & MASKS[dir];
-        }
+static uint64_t shift_left(uint64_t disks, int dir)
+{
+        /* Note: the directions refer to how we shift the bits, not the
+           positions on the board (where the least significant bit is
+           the top-left corner). */
+
+        static const uint64_t MASKS[] = {
+                0x7F7F7F7F7F7F7F7FULL, /* Right. */
+                0x007F7F7F7F7F7F7FULL, /* Down-right. */
+                0xFFFFFFFFFFFFFFFFULL, /* Down. */
+                0x00FEFEFEFEFEFEFEULL, /* Down-left. */
+                0xFEFEFEFEFEFEFEFEULL, /* Left. */
+                0xFEFEFEFEFEFEFE00ULL, /* Up-left. */
+                0xFFFFFFFFFFFFFFFFULL, /* Up. */
+                0x7F7F7F7F7F7F7F00ULL  /* Up-right. */
+        };
+        static const uint64_t LSHIFTS[] = {
+                0, /* Right. */
+                0, /* Down-right. */
+                0, /* Down. */
+                0, /* Down-left. */
+                1, /* Left. */
+                9, /* Up-left. */
+                8, /* Up. */
+                7  /* Up-right. */
+        };
+        static const uint64_t RSHIFTS[] = {
+                1, /* Right. */
+                9, /* Down-right. */
+                8, /* Down. */
+                7, /* Down-left. */
+                0, /* Left. */
+                0, /* Up-left. */
+                0, /* Up. */
+                0  /* Up-right. */
+        };
+
+        return (disks << LSHIFTS[dir]) & MASKS[dir];
 }
 
 static uint64_t generate_moves(uint64_t my_disks, uint64_t opp_disks)
@@ -131,19 +163,34 @@ static uint64_t generate_moves(uint64_t my_disks, uint64_t opp_disks)
 
 //        assert((my_disks & opp_disks) == 0 && "Disk sets should be disjoint.");
 
-        for (dir = 0; dir < NUM_DIRS; dir++) {
+        for (dir = 0; dir < NUM_DIRS/2; dir++) {
                 /* Get opponent disks adjacent to my disks in direction dir. */
-                x = shift(my_disks, dir) & opp_disks;
+                x = shift_right(my_disks, dir) & opp_disks;
 
                 /* Add opponent disks adjacent to those, and so on. */
-                x |= shift(x, dir) & opp_disks;
-                x |= shift(x, dir) & opp_disks;
-                x |= shift(x, dir) & opp_disks;
-                x |= shift(x, dir) & opp_disks;
-                x |= shift(x, dir) & opp_disks;
+                x |= shift_right(x, dir) & opp_disks;
+                x |= shift_right(x, dir) & opp_disks;
+                x |= shift_right(x, dir) & opp_disks;
+                x |= shift_right(x, dir) & opp_disks;
+                x |= shift_right(x, dir) & opp_disks;
 
                 /* Empty cells adjacent to those are valid moves. */
-                legal_moves |= shift(x, dir) & empty_cells;
+                legal_moves |= shift_right(x, dir) & empty_cells;
+        }
+
+        for (dir = NUM_DIRS/2; dir < NUM_DIRS; dir++) {
+                /* Get opponent disks adjacent to my disks in direction dir. */
+                x = shift_left(my_disks, dir) & opp_disks;
+
+                /* Add opponent disks adjacent to those, and so on. */
+                x |= shift_left(x, dir) & opp_disks;
+                x |= shift_left(x, dir) & opp_disks;
+                x |= shift_left(x, dir) & opp_disks;
+                x |= shift_left(x, dir) & opp_disks;
+                x |= shift_left(x, dir) & opp_disks;
+
+                /* Empty cells adjacent to those are valid moves. */
+                legal_moves |= shift_left(x, dir) & empty_cells;
         }
 
         return legal_moves;
@@ -177,19 +224,35 @@ static void resolve_move(uint64_t *my_disks, uint64_t *opp_disks, int board_idx)
 
         *my_disks |= new_disk;
 
-        for (dir = 0; dir < NUM_DIRS; dir++) {
+        for (dir = 0; dir < NUM_DIRS/2; dir++) {
                 /* Find opponent disk adjacent to the new disk. */
-                x = shift(new_disk, dir) & *opp_disks;
+                x = shift_right(new_disk, dir) & *opp_disks;
 
                 /* Add any adjacent opponent disk to that one, and so on. */
-                x |= shift(x, dir) & *opp_disks;
-                x |= shift(x, dir) & *opp_disks;
-                x |= shift(x, dir) & *opp_disks;
-                x |= shift(x, dir) & *opp_disks;
-                x |= shift(x, dir) & *opp_disks;
+                x |= shift_right(x, dir) & *opp_disks;
+                x |= shift_right(x, dir) & *opp_disks;
+                x |= shift_right(x, dir) & *opp_disks;
+                x |= shift_right(x, dir) & *opp_disks;
+                x |= shift_right(x, dir) & *opp_disks;
 
                 /* Determine whether the disks were captured. */
-                bounding_disk = shift(x, dir) & *my_disks;
+                bounding_disk = shift_right(x, dir) & *my_disks;
+                captured_disks |= (bounding_disk ? x : 0);
+        }
+
+        for (dir = NUM_DIRS/2; dir < NUM_DIRS; dir++) {
+                /* Find opponent disk adjacent to the new disk. */
+                x = shift_left(new_disk, dir) & *opp_disks;
+
+                /* Add any adjacent opponent disk to that one, and so on. */
+                x |= shift_left(x, dir) & *opp_disks;
+                x |= shift_left(x, dir) & *opp_disks;
+                x |= shift_left(x, dir) & *opp_disks;
+                x |= shift_left(x, dir) & *opp_disks;
+                x |= shift_left(x, dir) & *opp_disks;
+
+                /* Determine whether the disks were captured. */
+                bounding_disk = shift_left(x, dir) & *my_disks;
                 captured_disks |= (bounding_disk ? x : 0);
         }
 
@@ -208,23 +271,6 @@ void othello_make_move(othello_t *o, player_t p, int row, int col)
         resolve_move(&o->disks[p], &o->disks[p ^ 1], row * 8 + col);
 }
 
-static void frontier_disks(uint64_t my_disks, uint64_t opp_disks,
-                           uint64_t *my_frontier, uint64_t *opp_frontier)
-{
-        uint64_t empty_cells = ~(my_disks | opp_disks);
-        uint64_t x;
-        int dir;
-
-        *my_frontier = 0;
-        *opp_frontier = 0;
-
-        for (dir = 0; dir < NUM_DIRS; dir++) {
-                /* Check cells adjacent to empty cells. */
-                x = shift(empty_cells, dir);
-                *my_frontier |= x & my_disks;
-                *opp_frontier |= x & opp_disks;
-        }
-}
 
 #define WIN_BONUS (1 << 20)
 
