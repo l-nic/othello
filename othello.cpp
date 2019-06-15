@@ -365,8 +365,8 @@ void othello_compute_move(const othello_t *o, player_t p, int *row, int *col)
 {
         int move_idx;
 
-        static const int START_DEPTH = 8;
-        static const int EVAL_BUDGET = 500000;
+        static const int START_DEPTH = 1;
+        static const int EVAL_BUDGET = 2;
 
         assert(othello_has_valid_move(o, p));
 

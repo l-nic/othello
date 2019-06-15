@@ -9,15 +9,12 @@
 
 using namespace std;
 
-// // Function prototypes
-// void minimaxDecision(Board board, int maxPlyDepth, int &x, int &y);
-// int minimaxValue(Board board, Board::piece_t originalTurn, int searchPly, int maxPlyDepth);
-
 // Main game loop
 int main()
 {
 	srand(time(NULL));
 	othello_t gameBoard;
+	othello_init(&gameBoard);
 	player_t curPlayer = PLAYER_BLACK;
 
 	int maxPlyDepth = 1;
@@ -45,7 +42,8 @@ int main()
 		}
 		else
 		{
-			othello_compute_random_move(&gameBoard, curPlayer, &x, &y);
+			if (othello_has_valid_move(&gameBoard, curPlayer))
+				othello_compute_random_move(&gameBoard, curPlayer, &x, &y);
 		}
 		bool validMove = othello_is_valid_move(&gameBoard, curPlayer, x, y);
 		if (validMove || !othello_has_valid_move(&gameBoard, curPlayer))
@@ -54,7 +52,11 @@ int main()
 			// Use -1 if no move possible
 			if (validMove)
 				othello_make_move(&gameBoard, curPlayer, x, y);
-			curPlayer ^= 1; // swap players
+			// swap players
+			if (curPlayer == PLAYER_BLACK)
+				curPlayer = PLAYER_WHITE;
+			else
+				curPlayer = PLAYER_BLACK;
 		}
 		else
 		{
