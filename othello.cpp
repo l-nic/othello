@@ -111,13 +111,13 @@ static uint64_t shift(uint64_t disks, int dir)
                 0  /* Up-right. */
         };
 
-        assert(dir >= 0 && dir < NUM_DIRS);
+//        assert(dir >= 0 && dir < NUM_DIRS);
 
         if (dir < NUM_DIRS / 2) {
-                assert(LSHIFTS[dir] == 0 && "Shifting right.");
+//                assert(LSHIFTS[dir] == 0 && "Shifting right.");
                 return (disks >> RSHIFTS[dir]) & MASKS[dir];
         } else {
-                assert(RSHIFTS[dir] == 0 && "Shifting left.");
+//                assert(RSHIFTS[dir] == 0 && "Shifting left.");
                 return (disks << LSHIFTS[dir]) & MASKS[dir];
         }
 }
@@ -129,7 +129,7 @@ static uint64_t generate_moves(uint64_t my_disks, uint64_t opp_disks)
         uint64_t empty_cells = ~(my_disks | opp_disks);
         uint64_t legal_moves = 0;
 
-        assert((my_disks & opp_disks) == 0 && "Disk sets should be disjoint.");
+//        assert((my_disks & opp_disks) == 0 && "Disk sets should be disjoint.");
 
         for (dir = 0; dir < NUM_DIRS; dir++) {
                 /* Get opponent disks adjacent to my disks in direction dir. */
@@ -171,9 +171,9 @@ static void resolve_move(uint64_t *my_disks, uint64_t *opp_disks, int board_idx)
         uint64_t new_disk = 1ULL << board_idx;
         uint64_t captured_disks = 0;
 
-        assert(board_idx < 64 && "Move must be within the board.");
-        assert((*my_disks & *opp_disks) == 0 && "Disk sets must be disjoint.");
-        assert(!((*my_disks | *opp_disks) & new_disk) && "Target not empty!");
+//        assert(board_idx < 64 && "Move must be within the board.");
+//        assert((*my_disks & *opp_disks) == 0 && "Disk sets must be disjoint.");
+//        assert(!((*my_disks | *opp_disks) & new_disk) && "Target not empty!");
 
         *my_disks |= new_disk;
 
@@ -193,12 +193,12 @@ static void resolve_move(uint64_t *my_disks, uint64_t *opp_disks, int board_idx)
                 captured_disks |= (bounding_disk ? x : 0);
         }
 
-        assert(captured_disks && "A valid move must capture disks.");
+//        assert(captured_disks && "A valid move must capture disks.");
 
         *my_disks ^= captured_disks;
         *opp_disks ^= captured_disks;
 
-        assert(!(*my_disks & *opp_disks) && "The sets must still be disjoint.");
+//        assert(!(*my_disks & *opp_disks) && "The sets must still be disjoint.");
 }
 
 void othello_make_move(othello_t *o, player_t p, int row, int col)
