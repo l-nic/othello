@@ -214,7 +214,8 @@ bool othello_is_valid_move(const othello_t *o, player_t p, int row, int col)
 static void resolve_move(uint64_t *my_disks, uint64_t *opp_disks, int board_idx)
 {
         int dir;
-        uint64_t x, bounding_disk;
+        uint64_t x[NUM_DIRS];
+        uint64_t bounding_disks[NUM_DIRS];
         uint64_t new_disk = 1ULL << board_idx;
         uint64_t captured_disks = 0;
 
@@ -226,34 +227,36 @@ static void resolve_move(uint64_t *my_disks, uint64_t *opp_disks, int board_idx)
 
         for (dir = 0; dir < NUM_DIRS/2; dir++) {
                 /* Find opponent disk adjacent to the new disk. */
-                x = shift_right(new_disk, dir) & *opp_disks;
+                x[dir] = shift_right(new_disk, dir) & *opp_disks;
 
                 /* Add any adjacent opponent disk to that one, and so on. */
-                x |= shift_right(x, dir) & *opp_disks;
-                x |= shift_right(x, dir) & *opp_disks;
-                x |= shift_right(x, dir) & *opp_disks;
-                x |= shift_right(x, dir) & *opp_disks;
-                x |= shift_right(x, dir) & *opp_disks;
+                x[dir] |= shift_right(x[dir], dir) & *opp_disks;
+                x[dir] |= shift_right(x[dir], dir) & *opp_disks;
+                x[dir] |= shift_right(x[dir], dir) & *opp_disks;
+                x[dir] |= shift_right(x[dir], dir) & *opp_disks;
+                x[dir] |= shift_right(x[dir], dir) & *opp_disks;
 
                 /* Determine whether the disks were captured. */
-                bounding_disk = shift_right(x, dir) & *my_disks;
-                captured_disks |= (bounding_disk ? x : 0);
+                bounding_disks[dir] = shift_right(x[dir], dir) & *my_disks;
         }
 
         for (dir = NUM_DIRS/2; dir < NUM_DIRS; dir++) {
                 /* Find opponent disk adjacent to the new disk. */
-                x = shift_left(new_disk, dir) & *opp_disks;
+                x[dir] = shift_left(new_disk, dir) & *opp_disks;
 
                 /* Add any adjacent opponent disk to that one, and so on. */
-                x |= shift_left(x, dir) & *opp_disks;
-                x |= shift_left(x, dir) & *opp_disks;
-                x |= shift_left(x, dir) & *opp_disks;
-                x |= shift_left(x, dir) & *opp_disks;
-                x |= shift_left(x, dir) & *opp_disks;
+                x[dir] |= shift_left(x[dir], dir) & *opp_disks;
+                x[dir] |= shift_left(x[dir], dir) & *opp_disks;
+                x[dir] |= shift_left(x[dir], dir) & *opp_disks;
+                x[dir] |= shift_left(x[dir], dir) & *opp_disks;
+                x[dir] |= shift_left(x[dir], dir) & *opp_disks;
 
                 /* Determine whether the disks were captured. */
-                bounding_disk = shift_left(x, dir) & *my_disks;
-                captured_disks |= (bounding_disk ? x : 0);
+                bounding_disks[dir] = shift_left(x[dir], dir) & *my_disks;
+        }
+
+        for (int i = 0; i < NUM_DIRS; i++) {
+                captured_disks |= (bounding_disks[i] ? x[i] : 0);
         }
 
 //        assert(captured_disks && "A valid move must capture disks.");

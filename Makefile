@@ -1,7 +1,8 @@
 .PHONY: clean debug run
 
 CXX = g++
-CXXFLAGS = -std=c++11 -march=native -O3 -mavx2 -fopt-info-vec -ftree-vectorize -fopt-info-vec-missed
+#CXXFLAGS = -std=c++11 -march=native -O3 -mavx2 -fopt-info-vec -ftree-vectorize -fopt-info-vec-missed
+CXXFLAGS = -std=c++11 -march=native -O3 -mavx2 -fopt-info-vec -ftree-vectorize
 LDFLAGS =
 
 SOURCES = othello.cpp main.cpp
