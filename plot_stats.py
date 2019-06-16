@@ -29,6 +29,12 @@ def plot_stats(*files):
     ax = plt.gca()
     ax.autoscale()
 
+    # print stats
+    for stats in log_stats:
+        print '{} Statistics:'.format(stats['label'])
+        print '\t99% = {}'.format(np.percentile(stats['duration'], 99))
+        print '\t50% = {}'.format(np.percentile(stats['duration'], 50))
+
 def plot_cdf(data, label):
     sortData = np.sort(data)
     yvals = np.arange(len(sortData))/float(len(sortData))
