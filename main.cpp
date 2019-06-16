@@ -8,8 +8,9 @@
 #include <vector>
 #include "othello.hpp"
 
-#define PRINT_BOARD
-#define NUM_GAMES 1
+// #define PRINT_BOARD
+#define NUM_GAMES 100
+#define MAX_LEVEL 1
 
 using namespace std;
 using namespace std::chrono;
@@ -41,7 +42,7 @@ int main()
 					// record start time
 					high_resolution_clock::time_point t1 = high_resolution_clock::now();
 					// perform minimax search
-					othello_compute_move(&gameBoard, curPlayer, &x, &y);
+					othello_compute_move(&gameBoard, curPlayer, &x, &y, MAX_LEVEL);
 //					othello_compute_random_move(&gameBoard, curPlayer, &x, &y);
 					// record finish time
 					high_resolution_clock::time_point t2 = high_resolution_clock::now();

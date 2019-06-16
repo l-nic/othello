@@ -6,10 +6,33 @@ import matplotlib.pyplot as plt
 import argparse
 import numpy as np
 
-def plot_cdf(data):
+def plot_stats(*files):
+    # parse the logged pcap files
+    log_stats = []
+    for f in files:
+        stats = {}
+        stats['label'] = os.path.basename(f).replace('.plotme', '')
+        stats['duration'] = parse_file(f)
+        log_stats.append(stats)
+
+    print 'Creating plots ...'
+
+    # plot CDF of durations
+    f1 = plt.figure()
+    for stats in log_stats:
+        plot_cdf(stats['duration'], stats['label'])
+    plt.title("CDF of Othello Search Durations on Single Core")
+    plt.xlabel("Duration (ns)")
+    plt.ylabel("CDF")
+    plt.grid()
+    plt.legend(loc='lower right')
+    ax = plt.gca()
+    ax.autoscale()
+
+def plot_cdf(data, label):
     sortData = np.sort(data)
     yvals = np.arange(len(sortData))/float(len(sortData))
-    plt.plot(sortData, yvals, linestyle='-', marker='o')
+    plt.plot(sortData, yvals, label=label, linestyle='-', marker='o')
 
 def parse_file(filename):
     data = []
@@ -23,16 +46,10 @@ def parse_file(filename):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--file', type=str, help='<Required> File that contains samples to plot', required=True)
+    parser.add_argument('--files', nargs='+', help='<Required> Files that contains samples to plot', required=True)
     args = parser.parse_args()
 
-    data = parse_file(args.file)
-
-    # plot the data 
-    plot_cdf(data)
-    plt.title("Search duration CDF")
-    plt.xlabel("Duration (ns)")
-    plt.ylabel("CDF")
+    plot_stats(*args.files)
 
     font = {'family' : 'normal',
             'weight' : 'bold',

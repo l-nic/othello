@@ -44,7 +44,7 @@ bool othello_is_valid_move(const othello_t *o, player_t p, int row, int col);
 void othello_make_move(othello_t *o, player_t p, int row, int col);
 
 /* Compute a good move for player p. */
-void othello_compute_move(const othello_t *o, player_t p, int *row, int *col);
+void othello_compute_move(const othello_t *o, player_t p, int *row, int *col, int depth);
 
 /* Check if the game is over */
 bool othello_game_over(const othello_t *o);
@@ -57,6 +57,6 @@ void othello_compute_random_move(const othello_t *o, player_t p,
                                  int *row, int *col);
 int othello_eval(const othello_t *o, player_t p);
 int othello_negamax(const othello_t *o, player_t p, int depth);
-int othello_iterative_negamax(const othello_t *o, player_t p, int budget);
+int othello_iterative_negamax(const othello_t *o, player_t p, int depth);
 
 #endif // OTHELLO_HPP

@@ -324,7 +324,7 @@ int othello_eval(const othello_t *o, player_t p)
 }
 
 static int negamax(uint64_t my_disks, uint64_t opp_disks, int max_depth,
-                   int alpha, int beta, int *best_move, int *eval_count)
+                   int alpha, int beta, int *best_move)
 {
         uint64_t my_moves, opp_moves;
         uint64_t my_new_disks, opp_new_disks;
@@ -332,17 +332,9 @@ static int negamax(uint64_t my_disks, uint64_t opp_disks, int max_depth,
 
         /* Generate moves. */
         my_moves = generate_moves(my_disks, opp_disks);
-//        opp_moves = generate_moves(opp_disks, my_disks);
-
-//        if (!my_moves && opp_moves) {
-//                /* Null move. */
-//                return -negamax(opp_disks, my_disks, max_depth, -beta, -alpha,
-//                                best_move, eval_count);
-//        }
 
         if (max_depth == 0 || !my_moves) {
                 /* Maximum depth or terminal state reached. */
-                ++*eval_count;
                 return eval(my_disks, opp_disks, my_moves, 0);
         }
 
@@ -358,8 +350,7 @@ static int negamax(uint64_t my_disks, uint64_t opp_disks, int max_depth,
                 resolve_move(&my_new_disks, &opp_new_disks, i);
 
                 s = -negamax(opp_new_disks, my_new_disks,
-                             max_depth - 1, -beta, -alpha, NULL,
-                             eval_count);
+                             max_depth - 1, -beta, -alpha, NULL);
 
                 if (s > best) {
                         best = s;
@@ -379,50 +370,38 @@ static int negamax(uint64_t my_disks, uint64_t opp_disks, int max_depth,
 
 int othello_negamax(const othello_t *o, player_t p, int depth)
 {
-        int best_move, eval_count;
+        int best_move;
 
         return negamax(o->disks[p], o->disks[p ^ 1], depth, -INT_MAX, INT_MAX,
-                       &best_move, &eval_count);
+                       &best_move);
 }
 
-static int iterative_negamax(uint64_t my_disks, uint64_t opp_disks,
-                             int start_depth, int eval_budget)
+static int iterative_negamax(uint64_t my_disks, uint64_t opp_disks, int depth)
 {
-        int depth, best_move, eval_count, s;
+        int best_move;
 
-//        assert(start_depth > 0 && "At least one move must be explored.");
+//        assert(depth > 0 && "At least one move must be explored.");
 
-        eval_count = 0;
         best_move = -1;
-        for (depth = start_depth; eval_count < eval_budget; depth++) {
-                s = negamax(my_disks, opp_disks, depth, -INT_MAX, INT_MAX,
-                            &best_move, &eval_count);
-                if (s >= WIN_BONUS || -s >= WIN_BONUS) {
-                        break;
-                }
-        }
+        negamax(my_disks, opp_disks, depth, -INT_MAX, INT_MAX, &best_move);
 
 //        assert(best_move != -1 && "No move found?");
 
         return best_move;
 }
 
-int othello_iterative_negamax(const othello_t *o, player_t p, int budget)
+int othello_iterative_negamax(const othello_t *o, player_t p, int depth)
 {
-        return iterative_negamax(o->disks[p], o->disks[p ^ 1], 1, budget);
+        return iterative_negamax(o->disks[p], o->disks[p ^ 1], depth);
 }
 
-void othello_compute_move(const othello_t *o, player_t p, int *row, int *col)
+void othello_compute_move(const othello_t *o, player_t p, int *row, int *col, int depth)
 {
         int move_idx;
 
-        static const int START_DEPTH = 1;
-        static const int EVAL_BUDGET = 1;
-
 //        assert(othello_has_valid_move(o, p));
 
-        move_idx = iterative_negamax(o->disks[p], o->disks[p ^ 1],
-                                     START_DEPTH, EVAL_BUDGET);
+        move_idx = iterative_negamax(o->disks[p], o->disks[p ^ 1], depth);
 
         *row = move_idx / 8;
         *col = move_idx % 8;
